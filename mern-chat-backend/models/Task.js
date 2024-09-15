@@ -5,7 +5,7 @@ const taskSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    isImportant: {
+    isImportant:{
         type: Boolean,
         default: false
     },
