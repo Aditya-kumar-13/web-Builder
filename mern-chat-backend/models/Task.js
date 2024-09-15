@@ -5,6 +5,14 @@ const taskSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isImportant: {
+        type: Boolean,
+        default: false
+    },
+    deadline: {
+        type: Date,
+        required: true,
+    },
 });
 
 const Task = mongoose.model("Task", taskSchema);

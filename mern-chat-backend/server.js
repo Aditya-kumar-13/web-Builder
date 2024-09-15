@@ -96,7 +96,8 @@ io.on('connection', (socket)=> {
 
 // Listen for "addTask" event
 socket.on("addTask", async (data) => {
-    const newTask = new Task({ task: data.task });
+    const newTask = new Task({ task: data.task ,deadline:data.deadline});
+    console.log(newTask);
     await newTask.save(); // Save task to database
 
     // Broadcast the new task to all clients
