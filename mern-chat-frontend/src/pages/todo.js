@@ -82,7 +82,7 @@
 // export default Todo;
 import React, { useEffect, useState } from "react";
 import { Row, Col, Typography, Input, Button } from "antd";
-import { CheckCircleOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, StarOutlined ,StarFilled} from "@ant-design/icons";
 import { Grid } from "antd";
 import "./todo.css";
 
@@ -92,7 +92,7 @@ const Todo = ({ socket }) => {
 	const [task, setTask] = useState("");
 	const [deadline,setDeadline] = useState(null);
 	const [taskList, setTaskList] = useState([]);
-
+	const [isImportant,setIsImportant] = useState(false);
 	const addTask = () => {
 		if (task.trim()) {
 			socket.emit("addTask", { task,deadline });
@@ -101,17 +101,23 @@ const Todo = ({ socket }) => {
 		}
 	};
 
+	const toggleImportant = (taskId, currentImportantStatus) => {
+		const newImportantStatus = !currentImportantStatus;
+		console.log(`Task ID: ${taskId}, New Important Status: ${newImportantStatus}`);
+		socket.emit("updateImportantStatus", { taskId, isImportant: newImportantStatus });
+	};
+
 	const deleteTask = (taskId) => {
 		socket.emit("deleteTask", taskId);
 	};
 
 	useEffect(() => {
 		socket.on("allTasks", (tasks) => {
-			setTaskList(tasks);
+			setTaskList(tasks.reverse());
 		});
 
 		// Clean up when component unmounts
-		return () => socket.off("allTasks");
+		// return () => socket.off("allTasks");
 	}, [socket]);
 
 	return (
@@ -166,6 +172,17 @@ const Todo = ({ socket }) => {
 							{/* Apply scrollable container */}
 							{taskList.map((item) => (
 								<Row span={24} key={item._id} gutter={12} justify={"space-between"}>
+									<Col>{item.isImportant ? (
+											<StarFilled
+												style={{ color: "gold", cursor: "pointer" }}
+												onClick={() => toggleImportant(item._id, item.isImportant)}
+											/>
+										) : (
+											<StarOutlined
+												style={{ color: "gray", cursor: "pointer" }}
+												onClick={() => toggleImportant(item._id, item.isImportant)}
+											/>
+										)}</Col>
 									<Col>{item.task}</Col>
 								
 									<Col>{new Date(item.deadline).toLocaleDateString() }</Col><br></br>

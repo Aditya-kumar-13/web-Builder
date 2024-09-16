@@ -86,24 +86,40 @@ io.on('connection', (socket)=> {
       console.log(e);
       res.status(400).send()
     }
-  })
+  });
   //harshit branch integration
 
   Task.find().then((tasks) => {
-    socket.emit("allTasks", tasks);
-});
+    socket.emit("allTasks", tasks);  // Sort by createdAt descending
+  });
 
 
 // Listen for "addTask" event
 socket.on("addTask", async (data) => {
-    const newTask = new Task({ task: data.task,deadline:data.deadline});
+    const { task, deadline, isImportant } = data;
+    const newTask = new Task({  task, deadline, isImportant});
     console.log(newTask);
     await newTask.save(); // Save task to database
 
     // Broadcast the new task to all clients
-
     Task.find().then((tasks) => {
       io.emit("allTasks", tasks); // Emit all tasks to all clients
+    });
+
+    
+});
+Task.find().then((tasks) => {
+  io.emit("allTasks", tasks); // Emit all tasks to all clients
+});
+
+socket.on("updateImportantStatus", async ({ taskId, isImportant }) => {
+  await Task.findByIdAndUpdate(taskId, { isImportant });
+
+  // // Broadcast the updated task list
+  // const tasks = await Task.find().sort({ createdAt: -1 });
+  // io.emit("allTasks", tasks);  
+  Task.find().then((tasks) => {
+    io.emit("allTasks", tasks); // Emit all tasks to all clients
   });
 });
     socket.on('deleteTask', (taskId) => {
@@ -114,7 +130,6 @@ socket.on("addTask", async (data) => {
       });
     });
 });
-
 
 
 
